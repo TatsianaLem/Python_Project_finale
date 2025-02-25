@@ -16,12 +16,18 @@ class DBConnection:
         self._connect()
 
     def _setup_logging(self, log_file: str):
+        """
+            Настраивает систему логирования.
+        """
         if not logging.getLogger().hasHandlers():
             logging.basicConfig(filename=log_file, level=logging.INFO,
                                 format="%(asctime)s - %(levelname)s - %(message)s")
 
     def _connect(self):
-        """Создаёт подключение к базе данных и курсор."""
+        """
+            Создаёт подключение к базе данных и курсор.
+            Логирует ошибки при неудачном подключении.
+        """
         try:
             self._connection = pymysql.connect(**self._dbconfig, cursorclass=DictCursor)
             self._cursor = self._connection.cursor()
@@ -44,16 +50,18 @@ class DBConnection:
             with self._connection.cursor() as cursor:
                 cursor.execute(query, params)
                 if query.strip().upper().startswith("SELECT"):
-                    return cursor.fetchall()  # Возвращаем данные
+                    return cursor.fetchall()
                 self._connection.commit()
         except pymysql.Error as e:
             logging.error(f"Ошибка выполнения запроса: {e}")
             self._connection.rollback()
 
     def log_query(self, query: str):
+        """ Логирует выполняемый SQL-запрос. """
         logging.info(f"SQL Query: {query}")
 
     def get_connection(self):
+        """ Возвращает текущее соединение с БД, переподключаясь при необходимости. """
         if not self._connection or not self._connection.open:
             self._connect()
         return self._connection
@@ -65,14 +73,21 @@ class DBConnection:
         return self._connection.cursor() if self._connection else None
 
     def close(self):
-        """Закрывает соединение с базой данных."""
+        """Закрывает соединение с базой данных и курсор."""
         if self._cursor:
             self._cursor.close()
         if self._connection and self._connection.open:
             self._connection.close()
 
     def __enter__(self):
+        """
+            Метод для использования класса в контекстном менеджере (with).
+        """
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+            Метод для корректного выхода из контекстного менеджера.
+            Закрывает соединение при выходе из блока with.
+        """
         self.close()

@@ -5,6 +5,7 @@ from db_connection import DBConnection
 from sql_queries import FilmQueries
 
 class QueryHandler(DBConnection):
+    """ Инициализирует обработчик запросов. """
     def __init__(self, dbconfig, log_file='app.log', query_log_file='query_log.log', count_file='query_counts.json'):
         super().__init__(dbconfig, log_file)
         self.query_log_file = query_log_file
@@ -12,24 +13,23 @@ class QueryHandler(DBConnection):
         self.query_counts = self.load_query_counts()
 
     def log_query(self, query, params):
-        # Преобразуем параметры в строку
+        """
+            Логирует выполненный запрос, обновляет счетчики и сохраняет их.
+        """
         param_str = ', '.join(map(str.strip, map(str, params)))
 
-        # Обновляем счётчик запросов
         self.query_counts[param_str] = self.query_counts.get(param_str, 0) + 1
 
-        # Логируем только параметры (без SQL-запроса) в файл
         with open(self.query_log_file, 'a') as f:
             f.write(f"Params: ({param_str})\n")
             f.write(f"Total Execution for this Query: {self.query_counts.get(param_str)}\n\n")
         self.save_query_counts()
 
-        # Выводим только параметры (без SQL-запроса) в консоль
         print(f"Params: ({param_str})")
         print(f"Total Execution for this Query: {self.query_counts.get(param_str)}")
 
     def load_query_counts(self):
-        """ Загружает данные о популярных запросах из JSON-файла """
+        """ Сохраняет текущие популярные запросы в JSON-файл. """
         if os.path.exists(self.count_file):
             with open(self.count_file, 'r') as f:
                 try:
@@ -44,21 +44,19 @@ class QueryHandler(DBConnection):
             json.dump(self.query_counts, f, indent=4)
 
     def get_popular_queries(self, top_n=5):
+        """ Выводит top_n самых популярных запросов. """
         sorted_queries = sorted(self.query_counts.items(), key=lambda x: x[1], reverse=True)
 
         if not sorted_queries:
             print("Нет популярных запросов.")
             return []
-
         print("Самые популярные запросы (параметры):")
 
-        # Выводим только параметры и их количество
         for query, count in sorted_queries[:top_n]:
             print(f"Params: {query} | Total Execution for this Query: {count}")
 
-
     def get_all_films(self):
-        """ Получает все фильмы """
+        """ Получает все фильмы из базы данных."""
         try:
             with self.get_cursor() as cursor:
                 cursor.execute(FilmQueries.GET_ALL)
