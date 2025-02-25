@@ -29,7 +29,7 @@ class QueryHandler(DBConnection):
         print(f"Total Execution for this Query: {self.query_counts.get(param_str)}")
 
     def load_query_counts(self):
-        """ Сохраняет текущие популярные запросы в JSON-файл. """
+        """ Загружает данные о популярных запросах из JSON-файла. """
         if os.path.exists(self.count_file):
             with open(self.count_file, 'r') as f:
                 try:
