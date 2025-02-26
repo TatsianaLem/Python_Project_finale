@@ -9,15 +9,19 @@ from query_manager import QueryHandler
 
 
 def task1(dbconfig, keyword):
+    """ Выполняет поиск фильмов по ключевому слову и выводит результаты."""
+
     query_handler = QueryHandler(dbconfig)
     try:
-        print("Title : Description : Year:")
         films = query_handler.get_films_by_keyword(keyword)
         if not films:
             print("Фильмы не найдены.")
             return
         for row in films:
-            print(row.get('title'), row.get('description'), row.get('release_year'), sep=' : ')
+            print(f"Title: {row.get('title')}")
+            print(f"Description: {row.get('description')}")
+            print(f"Year: {row.get('release_year')}")
+            print("-" * 30)
     except pymysql.Error as e:
         print("SQLError", e)
     except Exception as e:
@@ -26,15 +30,19 @@ def task1(dbconfig, keyword):
         query_handler.close()
 
 def task2(dbconfig, genre, year):
+    """ Выполняет поиск фильмов по жанру и году и выводит результаты."""
+
     query_handler = QueryHandler(dbconfig)
     try:
-        print("Title : Genre: Year:")
         films = query_handler.get_films_by_genre_and_year(genre, year)
         if not films:
             print("Фильмы не найдены.")
             return
         for row in films:
-            print(row.get('title'), row.get('name'), row.get('release_year'), sep=' : ')
+            print(f"Title: {row.get('title')}")
+            print(f"Genre: {row.get('name')}")
+            print(f"Year: {row.get('release_year')}")
+            print("-" * 30)
     except pymysql.Error as e:
         print("SQLError", e)
     except Exception as e:
