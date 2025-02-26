@@ -17,12 +17,12 @@ class QueryHandler(DBConnection):
             Логирует выполненный запрос, обновляет счетчики и сохраняет их.
         """
         param_str = ', '.join(map(str.strip, map(str, params)))
-
         self.query_counts[param_str] = self.query_counts.get(param_str, 0) + 1
 
         with open(self.query_log_file, 'a') as f:
-            f.write(f"Params: ({param_str})\n")
+            f.write(f"Query: {query}\nParams: ({param_str})\n")
             f.write(f"Total Execution for this Query: {self.query_counts.get(param_str)}\n\n")
+
         self.save_query_counts()
 
         print(f"Params: ({param_str})")
@@ -43,7 +43,7 @@ class QueryHandler(DBConnection):
         with open(self.count_file, 'w') as f:
             json.dump(self.query_counts, f, indent=4)
 
-    def get_popular_queries(self, top_n=5):
+    def get_popular_queries(self, top_n=3):
         """ Выводит top_n самых популярных запросов. """
         sorted_queries = sorted(self.query_counts.items(), key=lambda x: x[1], reverse=True)
 
@@ -86,7 +86,6 @@ class QueryHandler(DBConnection):
             with self.get_cursor() as cursor:
                 cursor.execute(query, params)
                 records = cursor.fetchall()
-                #print("Выполнение запроса: ", records)
                 return records
         except Exception as e:
             logging.error(f"Ошибка при получении фильмов по жанру '{genre}' и году '{year}' : {e}")
