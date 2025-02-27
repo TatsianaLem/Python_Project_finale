@@ -45,6 +45,7 @@ class QueryHandler(DBConnection):
 
     def get_popular_queries(self, top_n=3):
         """ Выводит top_n самых популярных запросов. """
+        self.query_counts = self.load_query_counts()
         sorted_queries = sorted(self.query_counts.items(), key=lambda x: x[1], reverse=True)
 
         if not sorted_queries:
